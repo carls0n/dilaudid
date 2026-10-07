@@ -37,7 +37,7 @@ Follow these instructions for a fully functional terminal
 ```
 python3 -c 'import pty;pty.spawn("/bin/bash")'
 ```
-press cntrl + Z to background
+press cntrl + z to background
 ```
 stty raw -echo;fg
 ```
