@@ -1,4 +1,3 @@
-# dilaudid
 # Dilaudid
 
 Clone repository
