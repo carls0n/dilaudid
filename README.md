@@ -52,4 +52,8 @@ Uninstall
 ```
 sudo ./dilaudid-uninstall
 ```
+To close port 4444 after uninstalling
+```
+sudo fuser -k 4444/tcp
+```
 
