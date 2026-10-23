@@ -5,6 +5,7 @@
 #include <dlfcn.h>
 #include <errno.h>
 
+#define TARGET_NEEDLE "dilaudid.so"
 #define NEEDLE_LEN 11
 
 /* --- 1. Core Parsing Logic --- */
