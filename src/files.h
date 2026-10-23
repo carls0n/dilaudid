@@ -7,7 +7,6 @@
 #include <dlfcn.h>
 #include <sys/types.h>
 
-extern char *program_invocation_short_name;
 extern __thread int inside_hook;
 
 static int should_hide_file(const char *name) {
