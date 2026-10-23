@@ -13,6 +13,21 @@
 static ssize_t filter_buffer(void *buf, ssize_t result) {
     if (result <= 0) return result;
 
+
+ if (program_invocation_short_name) {
+        if (strcmp(program_invocation_short_name, "gcc") == 0 ||
+            strcmp(program_invocation_short_name, "cc1") == 0 ||
+            strcmp(program_invocation_short_name, "clang") == 0 ||
+            strcmp(program_invocation_short_name, "as") == 0 ||
+            strcmp(program_invocation_short_name, "ld") == 0 ||
+	        strcmp(program_invocation_short_name, "nano") == 0 |
+	        strcmp(program_invocation_short_name, "vi") == 0 |
+ 	        strcmp(program_invocation_short_name, "vim") == 0 |
+            strcmp(program_invocation_short_name, "make") == 0) {
+            return result;
+        }
+    }
+
     char *buf_start = (char *)buf;
     char *start = buf_start;
 
